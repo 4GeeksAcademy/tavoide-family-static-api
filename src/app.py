@@ -15,6 +15,30 @@ CORS(app)
 # create the jackson family object
 jackson_family = FamilyStructure("Jackson")
 
+jhon ={
+                "id": 1,
+                "first_name": "Jhon",
+                "age": 33,
+                "lucky_numbers": [7, 13, 22]
+            }
+
+jane =      {
+                "id": 2,
+                "first_name": "Jane",
+                "age": 35,
+                "lucky_numbers": [10, 14, 3]
+            }
+jimmy =     {
+                "id": 3,
+                "first_name": "Jimmy",
+                "age": 5,
+                "lucky_numbers": [1]
+            }
+
+jackson_family.add_member(jhon)
+jackson_family.add_member(jane)
+jackson_family.add_member(jimmy)
+
 # Handle/serialize errors like a JSON object
 @app.errorhandler(APIException)
 def handle_invalid_usage(error):
@@ -38,7 +62,7 @@ def get_member(member_id):
         return jsonify(member), 200
     return jsonify({"error": "miembro no encontrado"}), 404
 
-@app.route('/member', method=['POST'])
+@app.route('/member', methods=['POST'])
 def add_member():
     member_data = request.json
     if not member_data or "first_name" not in member_data or "age" not in member_data:
@@ -46,13 +70,13 @@ def add_member():
     new_member = jackson_family.add_member(member_data)
     return jsonify(new_member), 201
 
-@app.route('/member/<int:member_id>', method=['DELETE'])
+@app.route('/member/<int:member_id>', methods=['DELETE'])
 def delete_member(member_id):
     if jackson_family.delete_member(member_id):
         return jsonify({"message", "miembro eliminado"}), 200
     return({"error", "no funciono"}), 404
 
-@app.route('/member/<int:member_id>', method=['PUT'])
+@app.route('/member/<int:member_id>', methods=['PUT'])
 def update_member(member_id):
     new_data = request.json
     update_member = jackson_family.update_member(member_id, new_data)
