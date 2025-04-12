@@ -13,31 +13,7 @@ app.url_map.strict_slashes = False
 CORS(app)
 
 # create the jackson family object
-jackson_family = FamilyStructure("Jackson")
-
-jhon ={
-                "id": 1,
-                "first_name": "Jhon",
-                "age": 33,
-                "lucky_numbers": [7, 13, 22]
-            }
-
-jane =      {
-                "id": 2,
-                "first_name": "Jane",
-                "age": 35,
-                "lucky_numbers": [10, 14, 3]
-            }
-jimmy =     {
-                "id": 3,
-                "first_name": "Jimmy",
-                "age": 5,
-                "lucky_numbers": [1]
-            }
-
-jackson_family.add_member(jhon)
-jackson_family.add_member(jane)
-jackson_family.add_member(jimmy)
+jackson_family = FamilyStructure("Jackson")  
 
 # Handle/serialize errors like a JSON object
 @app.errorhandler(APIException)
@@ -50,40 +26,47 @@ def sitemap():
     return generate_sitemap(app)
 
 @app.route('/members', methods=['GET'])
-def get_all_members():
-    members = jackson_family.get_all_members()
-    return jsonify(members), 200
-
-
-@app.route('/member/<int:member_id>', methods=['GET'])
-def get_member(member_id):
-    member = jackson_family.get_member(member_id)
-    if member:
-        return jsonify(member), 200
-    return jsonify({"error": "miembro no encontrado"}), 404
+def handle_hello(): 
+    members=jackson_family.get_all_members()  
+    response_body=members
+    return jsonify(response_body),200
 
 @app.route('/member', methods=['POST'])
-def add_member():
-    member_data = request.json
-    if not member_data or "first_name" not in member_data or "age" not in member_data:
-        return jsonify({"error": "data invalida"}), 400
-    new_member = jackson_family.add_member(member_data)
-    return jsonify(new_member), 201
-
-@app.route('/member/<int:member_id>', methods=['DELETE'])
-def delete_member(member_id):
-    if jackson_family.delete_member(member_id):
-        return jsonify({"message", "miembro eliminado"}), 200
-    return({"error", "no funciono"}), 404
-
-@app.route('/member/<int:member_id>', methods=['PUT'])
-def update_member(member_id):
-    new_data = request.json
-    update_member = jackson_family.update_member(member_id, new_data)
-    if update_member:
-        return jsonify(update_member), 200
-    return jsonify({"error", "no sirvio"}), 404    
+def add_a_member(): 
+    try: 
+        request_body=request.get_json() 
+        if not request_body: 
+            return jsonify({"msg":"not request body"}),400
+        jackson_family.add_member(request_body)
+        return jsonify("member added"),200 
+    except:
+        return jsonify({"msg":"internal server error"}),500  
     
+@app.route('/member/<int:id>', methods=['GET'])
+def get_member(id): 
+    try: 
+        member=jackson_family.get_member(id)
+        if member: 
+            return jsonify(member),200 
+        else:
+            return jsonify({"msg":"no member found"}),400 
+    except:
+        return jsonify({"msg":"internal server error"}),500
+   
+
+
+
+@app.route('/member/<int:id>', methods=['DELETE'])
+def delete_a_member(id): 
+    try: 
+        deleted=jackson_family.delete_member(id)
+        if not deleted:         
+            return jsonify({'done':False}),400 
+        return jsonify({'done':True}),200 
+    except:
+        return jsonify({"msg":"internal server error"}),500
+
+
 
 # this only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':
